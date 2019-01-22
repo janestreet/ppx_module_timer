@@ -78,18 +78,23 @@ let print_with_left_column_right_justified alist =
 ;;
 
 let default_print_recorded_startup_times startup_times =
-  let override_span =
+  let startup_times =
     match
       get_am_recording_environment_variable () |> Option.bind ~f:span_in_ns_of_string
     with
-    | Some override -> fun index _ -> Int63.( * ) override (Int63.of_int index)
-    | None -> fun _ span -> span
+    | None -> startup_times
+    | Some override ->
+      Stdio.print_endline "ppx_module_timer: overriding time measurements for testing";
+      List.mapi startup_times ~f:(fun index (startup_time : Startup_time.t) ->
+        let startup_time_in_nanoseconds =
+          Int63.( * ) override (Int63.of_int (index + 1))
+        in
+        { startup_time with startup_time_in_nanoseconds })
   in
-  List.mapi
+  List.map
     startup_times
-    ~f:(fun index ({ module_name; startup_time_in_nanoseconds } : Startup_time.t) ->
-      ( string_of_span_in_ns (override_span (index + 1) startup_time_in_nanoseconds)
-      , module_name ))
+    ~f:(fun ({ module_name; startup_time_in_nanoseconds } : Startup_time.t) ->
+      string_of_span_in_ns startup_time_in_nanoseconds, module_name)
   |> print_with_left_column_right_justified
 ;;
 
