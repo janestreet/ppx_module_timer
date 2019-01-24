@@ -23,9 +23,12 @@ end
     The default callback prints each module name and startup time in the order given. To
     provide deterministic behavior in tests, if [am_recording_environment_variable] has
     the format of a time span, each recorded startup time is printed as a successive
-    increment of that value. *)
-val print_recorded_startup_times : (Startup_time.t list -> unit) ref
+    increment of that value.
 
+    [Core_kernel] overrides the default callback. The override formats the spans using
+    [Time_ns.Span.to_string_hum]. It also accepts sexp lists of span*string pairs in
+    [am_recording_environment_variable] to replace all recorded values. *)
+val print_recorded_startup_times : (Startup_time.t list -> unit) ref
 
 (**/**)
 
