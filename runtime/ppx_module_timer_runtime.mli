@@ -11,9 +11,19 @@ val am_recording : bool
 val am_recording_environment_variable : string
 
 module Startup_time : sig
+  module Gc_events : sig
+    type t =
+      { minor_collections : int
+      ; major_collections : int
+      ; compactions : int
+      }
+    [@@deriving sexp_of]
+  end
+
   type t =
     { module_name : string
     ; startup_time_in_nanoseconds : Int63.t
+    ; gc_events : Gc_events.t
     }
   [@@deriving sexp_of]
 end
@@ -29,6 +39,10 @@ end
     [Time_ns.Span.to_string_hum]. It also accepts sexp lists of span*string pairs in
     [am_recording_environment_variable] to replace all recorded values. *)
 val print_recorded_startup_times : (Startup_time.t list -> unit) ref
+
+(** If all gc event counts are zero, the empty string. Otherwise a string such as:
+    ["; GC: 2 minor collections, 1 major collections"] *)
+val gc_events_suffix_string : Startup_time.Gc_events.t -> string
 
 (**/**)
 
