@@ -7,42 +7,37 @@ val am_recording : bool
 (** If this environment variable is set (to anything) when this module starts up,
     [am_recording] is set to true.
 
-    Equal to "PPX_MODULE_TIMER". *)
+    Equal to "PPX_MODULE_TIMER".
+
+    If this is set to a valid duration string (see [Duration.format] below), that duration
+    is used to override recorded times for each module. This is used to make test output
+    deterministic.
+
+    If this is set to "FAKE_MODULES", the entire set of recorded data is overridden with
+    fake values. This is used to make test output both deterministic and stable, so that
+    changes in external library dependencies do not affect it. The fake data is not
+    particularly sensible, for example we are not careful to make the times for
+    definitions add up to the time for the enclosing module. *)
 val am_recording_environment_variable : string
 
-module Startup_time : sig
-  module Gc_events : sig
-    type t =
-      { minor_collections : int
-      ; major_collections : int
-      ; compactions : int
-      }
-    [@@deriving sexp_of]
+module Duration : sig
+  type t
+
+  val to_nanoseconds : t -> Int63.t
+  val of_nanoseconds : Int63.t -> t
+
+  module type Format = sig
+    val of_string : string -> t
+    val to_string_with_same_unit : t list -> string list
   end
 
-  type t =
-    { module_name : string
-    ; startup_time_in_nanoseconds : Int63.t
-    ; gc_events : Gc_events.t
-    }
-  [@@deriving sexp_of]
+  (** Determines the format of durations when reading [am_recording_environment_variable]
+      and when printing results. Defaults to integer nanoseconds with a "ns" suffix.
+
+      [Core_kernel.Time_ns] overrides this to use [Time_ns.Span.to_string] on input and
+      [Time_ns.Span.to_string_hum] on output. *)
+  val format : (module Format) ref
 end
-
-(** If [am_recording], called at process exit. The list is given in chronological order.
-
-    The default callback prints each module name and startup time in the order given. To
-    provide deterministic behavior in tests, if [am_recording_environment_variable] has
-    the format of a time span, each recorded startup time is printed as a successive
-    increment of that value.
-
-    [Core_kernel] overrides the default callback. The override formats the spans using
-    [Time_ns.Span.to_string_hum]. It also accepts sexp lists of span*string pairs in
-    [am_recording_environment_variable] to replace all recorded values. *)
-val print_recorded_startup_times : (Startup_time.t list -> unit) ref
-
-(** If all gc event counts are zero, the empty string. Otherwise a string such as:
-    ["; GC: 2 minor collections, 1 major collections"] *)
-val gc_events_suffix_string : Startup_time.Gc_events.t -> string
 
 (**/**)
 
@@ -57,6 +52,16 @@ val record_start : string -> unit
 (** If [am_recording], records when the specified module finishes its startup effects.
     Raises if there is no corresponding start time. *)
 val record_until : string -> unit
+
+(** If [am_recording], records when the specified definition begins its startup effects.
+    Raises if a previous definition started and has not finished, or if it is not called
+    during startup of an enclosing module. *)
+val record_definition_start : string -> unit
+
+(** If [am_recording], records when the specified definition finishes its startup effects.
+    Raises if there is no corresponding start time, or if it is not called during startup
+    of an enclosing module. *)
+val record_definition_until : string -> unit
 
 (** Duplicate of [Pervasives.__MODULE__]. *)
 external __MODULE__ : string = "%loc_MODULE"
