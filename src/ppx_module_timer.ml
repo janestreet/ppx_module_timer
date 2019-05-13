@@ -21,14 +21,21 @@ let is_ocaml_file string =
 let enclose_impl = function
   | Some (loc : Location.t)
     when is_ocaml_file loc.loc_start.pos_fname ->
-    ( [%str
-      let () =
-        Ppx_module_timer_runtime.record_start Ppx_module_timer_runtime.__MODULE__
-      ;;]
-    , [%str
-      let () =
-        Ppx_module_timer_runtime.record_until Ppx_module_timer_runtime.__MODULE__
-      ;;] )
+    let prefix =
+      let loc = { loc with loc_end = loc.loc_start } in
+      [%str
+        let () =
+          Ppx_module_timer_runtime.record_start Ppx_module_timer_runtime.__MODULE__
+        ;;]
+    in
+    let suffix =
+      let loc = { loc with loc_start = loc.loc_end } in
+      [%str
+        let () =
+          Ppx_module_timer_runtime.record_until Ppx_module_timer_runtime.__MODULE__
+        ;;]
+    in
+    prefix, suffix
   | _ -> [], []
 ;;
 
