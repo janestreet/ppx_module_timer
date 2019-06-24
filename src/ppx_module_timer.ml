@@ -19,8 +19,7 @@ let is_ocaml_file string =
 ;;
 
 let enclose_impl = function
-  | Some (loc : Location.t)
-    when is_ocaml_file loc.loc_start.pos_fname ->
+  | Some (loc : Location.t) when is_ocaml_file loc.loc_start.pos_fname ->
     let prefix =
       let loc = { loc with loc_end = loc.loc_start } in
       [%str
