@@ -15,7 +15,7 @@ depends: [
   "ppx_base"
   "stdio"
   "time_now"
-  "dune"     {>= "1.5.1"}
+  "dune"     {>= "2.0.0"}
   "ppxlib"   {>= "0.9.0"}
 ]
 synopsis: "Ppx rewriter that records top-level module startup times"
