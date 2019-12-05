@@ -92,7 +92,16 @@ module Time_individual_definitions = struct
   ;;
 end
 
-let impl structure =
+let structure_item_is_attribute item =
+  match item.pstr_desc with
+  | Pstr_attribute _ -> true
+  | _ -> false
+;;
+
+let impl structure_with_initial_attributes =
+  let initial_attributes, structure =
+    List.split_while structure_with_initial_attributes ~f:structure_item_is_attribute
+  in
   let prefix, suffix =
     let loc =
       Option.both (List.hd structure) (List.last structure)
@@ -112,7 +121,7 @@ let impl structure =
     | None -> structure
     | Some () -> Time_individual_definitions.obj#structure structure
   in
-  prefix @ middle @ suffix
+  initial_attributes @ prefix @ middle @ suffix
 ;;
 
 let () = Driver.register_transformation "module_timer" ~impl
