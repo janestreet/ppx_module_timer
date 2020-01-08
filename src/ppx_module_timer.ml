@@ -21,14 +21,14 @@ let is_ocaml_file string =
 let enclose_impl = function
   | Some (loc : Location.t) when is_ocaml_file loc.loc_start.pos_fname ->
     let prefix =
-      let loc = { loc with loc_end = loc.loc_start } in
+      let loc = { loc with loc_end = loc.loc_start; loc_ghost = true } in
       [%str
         let () =
           Ppx_module_timer_runtime.record_start Ppx_module_timer_runtime.__MODULE__
         ;;]
     in
     let suffix =
-      let loc = { loc with loc_start = loc.loc_end } in
+      let loc = { loc with loc_start = loc.loc_end; loc_ghost = true } in
       [%str
         let () =
           Ppx_module_timer_runtime.record_until Ppx_module_timer_runtime.__MODULE__
@@ -72,7 +72,7 @@ module Time_individual_definitions = struct
           if structure_item_is_compound item
           then [ self#structure_item item ]
           else (
-            let loc = item.pstr_loc in
+            let loc = { item.pstr_loc with loc_ghost = true } in
             let name =
               Location.print Caml.Format.str_formatter loc;
               Caml.Format.flush_str_formatter () |> String.chop_suffix_exn ~suffix:":"
