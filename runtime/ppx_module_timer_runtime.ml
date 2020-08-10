@@ -190,23 +190,21 @@ let fake_timing_events =
     }
   in
   lazy
-    (List.init 12 ~f:(fun i ->
-       ({ description = Printf.sprintf "Fake__Dependency_%d" (i + 1)
-        ; runtime = Int63.of_int (900 * (i + 1))
-        ; gc_events = gc_events i
-        ; nested_timing_events =
-            (if (i + 1) % 4 = 0
-             then
-               List.init (i + 1) ~f:(fun j ->
-                 ({ description = Printf.sprintf "Line %d" (j + 1)
-                  ; runtime = Int63.of_int (900 * (j + 1))
-                  ; gc_events = gc_events j
-                  ; nested_timing_events = []
-                  }
-                  : Timing_event.t))
-             else [])
-        }
-        : Timing_event.t)))
+    (List.init 12 ~f:(fun i : Timing_event.t ->
+       { description = Printf.sprintf "Fake__Dependency_%d" (i + 1)
+       ; runtime = Int63.of_int (900 * (i + 1))
+       ; gc_events = gc_events i
+       ; nested_timing_events =
+           (if (i + 1) % 4 = 0
+            then
+              List.init (i + 1) ~f:(fun j : Timing_event.t ->
+                { description = Printf.sprintf "Line %d" (j + 1)
+                ; runtime = Int63.of_int (900 * (j + 1))
+                ; gc_events = gc_events j
+                ; nested_timing_events = []
+                })
+            else [])
+       }))
 ;;
 
 let print_recorded_timing_events timing_events =
