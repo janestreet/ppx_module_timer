@@ -168,8 +168,7 @@ let rec timing_events_to_strings list ~indent =
   List.map2_exn
     duration_strings
     list
-    ~f:(fun duration_string
-         { runtime = _; description; gc_events; nested_timing_events }
+    ~f:(fun duration_string { runtime = _; description; gc_events; nested_timing_events }
          ->
            ( duration_string
            , description
