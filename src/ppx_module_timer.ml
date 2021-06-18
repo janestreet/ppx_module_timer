@@ -70,8 +70,8 @@ module Time_individual_definitions = struct
           else (
             let loc = { item.pstr_loc with loc_ghost = true } in
             let name =
-              Location.print Caml.Format.str_formatter loc;
-              Caml.Format.flush_str_formatter () |> String.chop_suffix_exn ~suffix:":"
+              Location.print Stdlib.Format.str_formatter loc;
+              Stdlib.Format.flush_str_formatter () |> String.chop_suffix_exn ~suffix:":"
             in
             [%str
               let () =

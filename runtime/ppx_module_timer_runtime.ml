@@ -1,13 +1,13 @@
 open! Base
-module Gc = Caml.Gc
+module Gc = Stdlib.Gc
 
 external __MODULE__ : string = "%loc_MODULE"
 
 let am_recording_environment_variable = "PPX_MODULE_TIMER"
 
 let get_am_recording_environment_variable () =
-  (* avoid Caml.Sys.getenv_opt to preserve 4.04.x compatibility *)
-  match Caml.Sys.getenv am_recording_environment_variable with
+  (* avoid Stdlib.Sys.getenv_opt to preserve 4.04.x compatibility *)
+  match Stdlib.Sys.getenv am_recording_environment_variable with
   | value -> Some value
   | exception _ -> None
 ;;
@@ -237,7 +237,7 @@ let print_recorded_timing_events timing_events =
 let () =
   if am_recording
   then
-    Caml.at_exit (fun () ->
+    Stdlib.at_exit (fun () ->
       print_recorded_timing_events
         (List.rev module_timer.timing_events_in_reverse_chronological_order))
 ;;
