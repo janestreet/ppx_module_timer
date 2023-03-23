@@ -168,15 +168,16 @@ let rec timing_events_to_strings list ~indent =
   List.map2_exn
     duration_strings
     list
-    ~f:(fun duration_string { runtime = _; description; gc_events; nested_timing_events }
-         ->
-           ( duration_string
-           , description
-             ^ gc_events_suffix_string gc_events
-             ^ String.concat
-                 (List.map
-                    (timing_events_to_strings nested_timing_events ~indent:(indent + 4))
-                    ~f:(fun line -> "\n" ^ line)) ))
+    ~f:
+      (fun
+        duration_string { runtime = _; description; gc_events; nested_timing_events } ->
+        ( duration_string
+        , description
+          ^ gc_events_suffix_string gc_events
+          ^ String.concat
+              (List.map
+                 (timing_events_to_strings nested_timing_events ~indent:(indent + 4))
+                 ~f:(fun line -> "\n" ^ line)) ))
   |> with_left_column_right_justified
   |> List.map ~f:(fun line -> prefix ^ line)
 ;;
