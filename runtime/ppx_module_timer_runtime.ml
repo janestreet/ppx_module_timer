@@ -125,7 +125,7 @@ module Timer = struct
         { description; runtime; gc_events; nested_timing_events }
       in
       t.timing_events_in_reverse_chronological_order
-      <- timing_event :: t.timing_events_in_reverse_chronological_order;
+        <- timing_event :: t.timing_events_in_reverse_chronological_order;
       reset t)
   ;;
 end
@@ -138,7 +138,7 @@ let record_definition_start loc = Timer.record_start definition_timer loc
 let record_definition_until loc = Timer.record_until definition_timer loc
 
 let gc_events_suffix_string
-      ({ minor_collections; major_collections; compactions } : Gc_events.t)
+  ({ minor_collections; major_collections; compactions } : Gc_events.t)
   =
   let to_list description count =
     if count = 0 then [] else [ Int.to_string count ^ " " ^ description ]
@@ -171,13 +171,13 @@ let rec timing_events_to_strings list ~indent =
     ~f:
       (fun
         duration_string { runtime = _; description; gc_events; nested_timing_events } ->
-        ( duration_string
-        , description
-          ^ gc_events_suffix_string gc_events
-          ^ String.concat
-              (List.map
-                 (timing_events_to_strings nested_timing_events ~indent:(indent + 4))
-                 ~f:(fun line -> "\n" ^ line)) ))
+    ( duration_string
+    , description
+      ^ gc_events_suffix_string gc_events
+      ^ String.concat
+          (List.map
+             (timing_events_to_strings nested_timing_events ~indent:(indent + 4))
+             ~f:(fun line -> "\n" ^ line)) ))
   |> with_left_column_right_justified
   |> List.map ~f:(fun line -> prefix ^ line)
 ;;
@@ -226,8 +226,8 @@ let print_recorded_timing_events timing_events =
              List.mapi
                timing_event.nested_timing_events
                ~f:(fun index nested_timing_event ->
-                 let runtime = Int63.( * ) override (Int63.of_int (index + 1)) in
-                 { nested_timing_event with runtime })
+               let runtime = Int63.( * ) override (Int63.of_int (index + 1)) in
+               { nested_timing_event with runtime })
            in
            { timing_event with runtime; nested_timing_events })
        | exception _ -> timing_events)

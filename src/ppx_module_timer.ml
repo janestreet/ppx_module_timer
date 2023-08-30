@@ -101,7 +101,7 @@ let impl structure_with_initial_attributes =
     let loc =
       Option.both (List.hd structure) (List.last structure)
       |> Option.map ~f:(fun (first, last) ->
-        { first.pstr_loc with loc_end = last.pstr_loc.loc_end })
+           { first.pstr_loc with loc_end = last.pstr_loc.loc_end })
     in
     enclose_impl loc
   in
