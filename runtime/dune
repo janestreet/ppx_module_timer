@@ -1,3 +1,6 @@
-(library (name ppx_module_timer_runtime)
- (public_name ppx_module_timer.runtime) (libraries base stdio time_now)
- (preprocess (pps ppx_base)))
+(library
+ (name ppx_module_timer_runtime)
+ (public_name ppx_module_timer.runtime)
+ (libraries base stdio time_now)
+ (preprocess
+  (pps ppx_base)))
