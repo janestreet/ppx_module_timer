@@ -95,14 +95,14 @@ module Timer = struct
       t.currently_running_description <- description;
       t.currently_running_gc_stats <- Gc.quick_stat ();
       (* call [Time_now] as late as possible before running the module body *)
-      t.currently_running_start_time <- Time_now.nanoseconds_since_unix_epoch ())
+      t.currently_running_start_time <- Time_now.nanosecond_counter_for_timing ())
   ;;
 
   let record_until t description =
     if am_recording
     then (
       (* compute [Time_now] as soon as possible after running the module body *)
-      let until = Time_now.nanoseconds_since_unix_epoch () in
+      let until = Time_now.nanosecond_counter_for_timing () in
       let start = t.currently_running_start_time in
       let gc_stats_after = Gc.quick_stat () in
       let gc_stats_before = t.currently_running_gc_stats in
