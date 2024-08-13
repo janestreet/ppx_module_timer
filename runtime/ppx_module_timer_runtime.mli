@@ -63,5 +63,42 @@ val record_definition_start : string -> unit
     of an enclosing module. *)
 val record_definition_until : string -> unit
 
+module For_introspection : sig
+  (** These types are stored to forward recorded things to other tooling that might
+      be interested in these timings. *)
+
+  (** Represents a time span in nanoseconds. *)
+  module Duration : sig
+    type t = Int63.t
+  end
+
+  module Gc_events : sig
+    type t =
+      { minor_collections : int
+      ; major_collections : int
+      ; compactions : int
+      }
+  end
+
+  module Timing_event : sig
+    type t =
+      { description : string
+      ; runtime : Duration.t
+      ; gc_events : Gc_events.t
+      ; nested_timing_events : t list
+      }
+  end
+
+  val timing_events_in_reverse_chronological_order : unit -> Timing_event.t list
+  val timing_events_to_strings : Timing_event.t list -> indent:int -> string list
+end
+
 (** Duplicate of [Pervasives.__MODULE__]. *)
 external __MODULE__ : string = "%loc_MODULE"
+
+module For_testing : sig
+  module Javascript_performance : sig
+    val mark_start : string -> unit
+    val mark_end : unit -> unit
+  end
+end

@@ -1,0 +1,5 @@
+(library
+ (name test_ppx_module_timer_javascript)
+ (preprocess
+  (pps ppx_jane js_of_ocaml-ppx))
+ (libraries core js_of_ocaml ppx_module_timer_runtime))

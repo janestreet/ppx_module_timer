@@ -63,6 +63,11 @@ module Timing_event = struct
 end
 
 module Timer = struct
+  module Stubs = struct
+    external mark_start : string -> unit = "ppx_module_timer_runtime_mark_start"
+    external mark_end : unit -> unit = "ppx_module_timer_runtime_mark_end"
+  end
+
   type t =
     { mutable currently_running_description : string
     ; mutable currently_running_start_time : Duration.t
@@ -88,21 +93,35 @@ module Timer = struct
     | Some nested -> nested.timing_events_in_reverse_chronological_order <- []
   ;;
 
-  let record_start t description =
+  module Recording_kind = struct
+    (* Definition recording via the js stubs are currently broken, so 
+       only publish the Module definitions to Chrome's profiler. *)
+    type t =
+      | Module
+      | Definition
+  end
+
+  let record_start ~kind t description =
     if am_recording
     then (
       assert (String.is_empty t.currently_running_description);
       t.currently_running_description <- description;
       t.currently_running_gc_stats <- Gc.quick_stat ();
+      (match (kind : Recording_kind.t) with
+       | Module -> Stubs.mark_start description
+       | Definition -> ());
       (* call [Time_now] as late as possible before running the module body *)
       t.currently_running_start_time <- Time_now.nanosecond_counter_for_timing ())
   ;;
 
-  let record_until t description =
+  let record_until ~kind t description =
     if am_recording
     then (
       (* compute [Time_now] as soon as possible after running the module body *)
       let until = Time_now.nanosecond_counter_for_timing () in
+      (match (kind : Recording_kind.t) with
+       | Module -> Stubs.mark_end ()
+       | Definition -> ());
       let start = t.currently_running_start_time in
       let gc_stats_after = Gc.quick_stat () in
       let gc_stats_before = t.currently_running_gc_stats in
@@ -125,17 +144,17 @@ module Timer = struct
         { description; runtime; gc_events; nested_timing_events }
       in
       t.timing_events_in_reverse_chronological_order
-        <- timing_event :: t.timing_events_in_reverse_chronological_order;
+      <- timing_event :: t.timing_events_in_reverse_chronological_order;
       reset t)
   ;;
 end
 
 let definition_timer = Timer.create ()
 let module_timer = Timer.create ~nested_timer:definition_timer ()
-let record_start module_name = Timer.record_start module_timer module_name
-let record_until module_name = Timer.record_until module_timer module_name
-let record_definition_start loc = Timer.record_start definition_timer loc
-let record_definition_until loc = Timer.record_until definition_timer loc
+let record_start module_name = Timer.record_start ~kind:Module module_timer module_name
+let record_until module_name = Timer.record_until ~kind:Module module_timer module_name
+let record_definition_start loc = Timer.record_start ~kind:Definition definition_timer loc
+let record_definition_until loc = Timer.record_until ~kind:Definition definition_timer loc
 
 let gc_events_suffix_string
   ({ minor_collections; major_collections; compactions } : Gc_events.t)
@@ -171,13 +190,13 @@ let rec timing_events_to_strings list ~indent =
     ~f:
       (fun
         duration_string { runtime = _; description; gc_events; nested_timing_events } ->
-    ( duration_string
-    , description
-      ^ gc_events_suffix_string gc_events
-      ^ String.concat
-          (List.map
-             (timing_events_to_strings nested_timing_events ~indent:(indent + 4))
-             ~f:(fun line -> "\n" ^ line)) ))
+      ( duration_string
+      , description
+        ^ gc_events_suffix_string gc_events
+        ^ String.concat
+            (List.map
+               (timing_events_to_strings nested_timing_events ~indent:(indent + 4))
+               ~f:(fun line -> "\n" ^ line)) ))
   |> with_left_column_right_justified
   |> List.map ~f:(fun line -> prefix ^ line)
 ;;
@@ -226,8 +245,8 @@ let print_recorded_timing_events timing_events =
              List.mapi
                timing_event.nested_timing_events
                ~f:(fun index nested_timing_event ->
-               let runtime = Int63.( * ) override (Int63.of_int (index + 1)) in
-               { nested_timing_event with runtime })
+                 let runtime = Int63.( * ) override (Int63.of_int (index + 1)) in
+                 { nested_timing_event with runtime })
            in
            { timing_event with runtime; nested_timing_events })
        | exception _ -> timing_events)
@@ -242,3 +261,22 @@ let () =
       print_recorded_timing_events
         (List.rev module_timer.timing_events_in_reverse_chronological_order))
 ;;
+
+module For_introspection = struct
+  module Duration = Duration
+  module Gc_events = Gc_events
+  module Timing_event = Timing_event
+
+  let timing_events_in_reverse_chronological_order : unit -> Timing_event.t list =
+    fun () -> module_timer.timing_events_in_reverse_chronological_order
+  ;;
+
+  let timing_events_to_strings = timing_events_to_strings
+end
+
+module For_testing = struct
+  module Javascript_performance = struct
+    let mark_start = Timer.Stubs.mark_start
+    let mark_end = Timer.Stubs.mark_end
+  end
+end

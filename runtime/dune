@@ -1,6 +1,11 @@
 (library
+ (foreign_stubs
+  (language c)
+  (names stubs))
  (name ppx_module_timer_runtime)
  (public_name ppx_module_timer.runtime)
  (libraries base stdio time_now)
  (preprocess
-  (pps ppx_base)))
+  (pps ppx_base))
+ (js_of_ocaml
+  (javascript_files stubs.js)))
