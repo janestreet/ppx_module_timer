@@ -89,7 +89,11 @@ end
 
 let structure_item_is_attribute item =
   match item.pstr_desc with
-  | Pstr_attribute _ -> true
+  | Pstr_attribute _ ->
+    (match item with
+     | [%stri [@@@ppx_module_timer.pay_overhead_to_time_individual_definitions]]
+     | [%stri [@@@pay_overhead_to_time_individual_definitions]] -> false
+     | _ -> true)
   | _ -> false
 ;;
 
