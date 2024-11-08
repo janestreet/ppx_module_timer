@@ -18,6 +18,15 @@ let is_ocaml_file string =
   String.is_suffix string ~suffix:".ml" || String.is_suffix string ~suffix:".mll"
 ;;
 
+let pay_over_head_to_time_individual_definitions_flag_is_set = ref false
+
+let () =
+  Driver.add_arg
+    "-ppx-module-timer-pay-overhead-to-time-individual-definitions"
+    (Unit (fun () -> pay_over_head_to_time_individual_definitions_flag_is_set := true))
+    ~doc:" If set, PPX_MODULE_TIMER will time individual definitions."
+;;
+
 let enclose_impl = function
   | Some (loc : Location.t) when is_ocaml_file loc.loc_start.pos_fname ->
     let prefix =
@@ -63,6 +72,9 @@ module Time_individual_definitions = struct
     object (self)
       inherit Ast_traverse.map
 
+      (* We don't want to modify the payloads of attributes or extensions. *)
+      method! payload payload = payload
+
       method! structure structure =
         List.concat_map structure ~f:(fun item ->
           if structure_item_is_compound item
@@ -89,7 +101,11 @@ end
 
 let structure_item_is_attribute item =
   match item.pstr_desc with
-  | Pstr_attribute _ -> true
+  | Pstr_attribute _ ->
+    (match item with
+     | [%stri [@@@ppx_module_timer.pay_overhead_to_time_individual_definitions]]
+     | [%stri [@@@pay_overhead_to_time_individual_definitions]] -> false
+     | _ -> true)
   | _ -> false
 ;;
 
@@ -107,14 +123,15 @@ let impl structure_with_initial_attributes =
   in
   let middle =
     match
-      List.find_map structure ~f:(fun item ->
-        match item.pstr_desc with
-        | Pstr_attribute _ ->
-          Attribute.Floating.convert [ Time_individual_definitions.attribute ] item
-        | _ -> None)
+      ( !pay_over_head_to_time_individual_definitions_flag_is_set
+      , List.find_map structure ~f:(fun item ->
+          match item.pstr_desc with
+          | Pstr_attribute _ ->
+            Attribute.Floating.convert [ Time_individual_definitions.attribute ] item
+          | _ -> None) )
     with
-    | None -> structure
-    | Some () -> Time_individual_definitions.obj#structure structure
+    | false, None -> structure
+    | true, _ | _, Some () -> Time_individual_definitions.obj#structure structure
   in
   initial_attributes @ prefix @ middle @ suffix
 ;;
