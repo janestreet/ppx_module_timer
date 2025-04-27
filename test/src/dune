@@ -1,0 +1,12 @@
+(alias
+ (name test-runner-runtime-deps)
+ (deps
+  ../examples/lib/inline_tests_runner
+  ../examples/lib/inline_tests_runner.exe
+  (glob_files ../examples/lib/*.ml)))
+
+(library
+ (name test_ppx_module_timer)
+ (libraries async core expect_test_helpers_async expect_test_helpers_core)
+ (preprocess
+  (pps ppx_jane)))

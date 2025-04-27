@@ -1,0 +1,7 @@
+(executables
+ (modes byte exe)
+ (names hello_world_without_dependencies hello_world_with_bin_dependencies
+   hello_world_with_core_dependencies hello_world_with_lib_dependencies)
+ (libraries core_unix.command_unix core ppx_module_timer_example_lib)
+ (preprocess
+  (pps ppx_jane)))

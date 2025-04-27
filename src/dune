@@ -2,7 +2,7 @@
  (name ppx_module_timer)
  (public_name ppx_module_timer)
  (kind ppx_rewriter)
- (libraries base ppxlib)
+ (libraries base ppxlib ppxlib_jane)
  (preprocess
   (pps ppxlib.metaquot))
  (ppx_runtime_libraries ppx_module_timer.runtime))
