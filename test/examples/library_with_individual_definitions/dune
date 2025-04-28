@@ -1,0 +1,5 @@
+(library
+ (name ppx_module_timer_example_lib_via_jbuild_flag)
+ (preprocess
+  (pps ppx_module_timer
+    -ppx-module-timer-pay-overhead-to-time-individual-definitions)))

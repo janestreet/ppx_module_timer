@@ -64,8 +64,8 @@ val record_definition_start : string -> unit
 val record_definition_until : string -> unit
 
 module For_introspection : sig
-  (** These types are stored to forward recorded things to other tooling that might
-      be interested in these timings. *)
+  (** These types are stored to forward recorded things to other tooling that might be
+      interested in these timings. *)
 
   (** Represents a time span in nanoseconds. *)
   module Duration : sig

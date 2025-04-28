@@ -53,18 +53,20 @@ module Time_individual_definitions = struct
   ;;
 
   let rec module_expr_is_compound module_expr =
-    match module_expr.pmod_desc with
+    match Ppxlib_jane.Shim.Module_expr_desc.of_parsetree module_expr.pmod_desc with
     | Pmod_structure _ -> true
-    | Pmod_constraint (body, _) -> module_expr_is_compound body
+    | Pmod_constraint (body, _, _) -> module_expr_is_compound body
     | _ -> false
   ;;
 
   let structure_item_is_compound item =
     match item.pstr_desc with
     | Pstr_recmodule module_bindings ->
-      List.for_all module_bindings ~f:(fun module_binding ->
+      List.exists module_bindings ~f:(fun module_binding ->
         module_expr_is_compound module_binding.pmb_expr)
     | Pstr_module module_binding -> module_expr_is_compound module_binding.pmb_expr
+    | Pstr_include include_infos -> module_expr_is_compound include_infos.pincl_mod
+    | Pstr_open open_declaration -> module_expr_is_compound open_declaration.popen_expr
     | _ -> false
   ;;
 

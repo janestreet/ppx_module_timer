@@ -8,4 +8,7 @@
  (preprocess
   (pps ppx_base))
  (js_of_ocaml
-  (javascript_files stubs.js)))
+  (javascript_files stubs.js))
+ (wasm_of_ocaml
+  (javascript_files stubs.js)
+  (wasm_files stubs.wat)))
