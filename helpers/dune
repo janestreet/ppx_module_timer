@@ -1,0 +1,6 @@
+(library
+ (name ppx_module_timer_helpers)
+ (public_name ppx_module_timer.helpers)
+ (libraries ppxlib)
+ (preprocess
+  (pps ppxlib.metaquot)))
