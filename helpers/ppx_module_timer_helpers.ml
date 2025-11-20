@@ -10,9 +10,9 @@ let attempt_to_put_structure_item_after_the_ppx_module_timer_start
      as first)
     :: remaining ->
     first :: structure_item :: remaining
-    (* Conservatively match on ppx_module_timer_runtime being the first item. If it
-       is, we'll place our hoister after it so that we can include the hoister in
-       the module timer *)
+    (* Conservatively match on ppx_module_timer_runtime being the first item. If it is,
+       we'll place our hoister after it so that we can include the hoister in the module
+       timer *)
   | _ ->
     (* Default to putting the hoisted module at the very front of the structure *)
     structure_item :: entire_file
