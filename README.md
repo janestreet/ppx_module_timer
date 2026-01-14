@@ -9,4 +9,8 @@ anything), each module records its startup time, and before exiting the process 
 all of the module times in the order they occurred.
 
 If a file contains `[@@@ppx_module_timer.pay_overhead_to_time_individual_definitions]`,
-the individual definitions will be timed (at the cost of some minor extra overhead.)
+the individual definitions will be timed in that file (at the cost of some minor extra
+overhead.)
+
+If `PPX_MODULE_TIMER_PAY_OVERHEAD_TO_TIME_INDIVIDUAL_DEFINITIONS=true` is passed as a
+build env variable, then individual definitions will be timed across all files.
