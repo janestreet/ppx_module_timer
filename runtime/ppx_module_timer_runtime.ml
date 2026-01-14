@@ -94,8 +94,8 @@ module Timer = struct
   ;;
 
   module Recording_kind = struct
-    (* Definition recording via the js stubs are currently broken, so 
-       only publish the Module definitions to Chrome's profiler. *)
+    (* Definition recording via the js stubs are currently broken, so only publish the
+       Module definitions to Chrome's profiler. *)
     type t =
       | Module
       | Definition
