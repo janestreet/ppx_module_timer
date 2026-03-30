@@ -1,5 +1,5 @@
 (library
  (name test_ppx_module_timer_javascript)
  (preprocess
-  (pps ppx_jane js_of_ocaml-ppx))
+  (pps ppx_jane js_of_ocaml-ppx -compare-require-explicit-locality))
  (libraries core js_of_ocaml ppx_module_timer_runtime))

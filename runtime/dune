@@ -6,7 +6,7 @@
  (public_name ppx_module_timer.runtime)
  (libraries base stdio time_now)
  (preprocess
-  (pps ppx_base))
+  (pps ppx_base -compare-require-explicit-locality))
  (js_of_ocaml
   (javascript_files stubs.js))
  (wasm_of_ocaml
