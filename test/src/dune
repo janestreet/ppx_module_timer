@@ -7,6 +7,6 @@
 
 (library
  (name test_ppx_module_timer)
- (libraries async core expect_test_helpers_async expect_test_helpers_core)
+ (libraries async core expect_test_helpers_async)
  (preprocess
   (pps ppx_jane)))
